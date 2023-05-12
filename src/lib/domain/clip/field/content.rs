@@ -19,3 +19,21 @@ impl Content {
         self.0.as_str()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new_content() {
+        let content = Content::from_str("Hello, world!").unwrap();
+        assert_eq!(content.as_str(), "Hello, world!");
+    }
+
+    #[test]
+    fn test_into_inner() {
+        let content = Content::from_str("Hello, world!").unwrap();
+        let inner = content.into_inner();
+        assert_eq!(inner, "Hello, world!");
+    }
+}
