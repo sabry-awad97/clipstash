@@ -7,4 +7,5 @@ pub struct Clip {
     pub title: field::Title,
     pub posted: field::Posted,
     pub expires: field::Expires,
+    pub password: field::Password,
 }

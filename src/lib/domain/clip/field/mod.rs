@@ -15,3 +15,6 @@ pub use posted::Posted;
 
 mod expires;
 pub use expires::Expires;
+
+mod password;
+pub use password::Password;
