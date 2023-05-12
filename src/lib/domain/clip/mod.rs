@@ -5,4 +5,5 @@ pub struct Clip {
     pub shortcode: field::ShortCode,
     pub content: field::Content,
     pub title: field::Title,
+    pub posted: field::Posted,
 }

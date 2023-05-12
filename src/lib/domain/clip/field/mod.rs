@@ -9,3 +9,6 @@ pub use content::Content;
 
 mod title;
 pub use title::Title;
+
+mod posted;
+pub use posted::Posted;
