@@ -1,5 +1,7 @@
 pub mod field;
+use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Clip {
     pub clip_id: field::ClipId,
     pub shortcode: field::ShortCode,
