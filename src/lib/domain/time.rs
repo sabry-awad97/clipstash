@@ -18,6 +18,13 @@ impl Time {
     pub fn from_naive_utc(datetime: NaiveDateTime) -> Self {
         Time(DateTime::from_utc(datetime, Utc))
     }
+
+    pub fn from_seconds(seconds: i64) -> Self {
+        Self(DateTime::from_utc(
+            NaiveDateTime::from_timestamp_opt(seconds, 0).unwrap(),
+            Utc,
+        ))
+    }
 }
 
 impl FromStr for Time {
