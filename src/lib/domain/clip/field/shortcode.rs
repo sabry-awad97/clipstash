@@ -1,6 +1,6 @@
 use rand::{seq::SliceRandom, thread_rng};
 use serde::{Deserialize, Serialize};
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct ShortCode(String);
 
 impl ShortCode {
@@ -43,5 +43,49 @@ impl From<ShortCode> for String {
 impl From<&str> for ShortCode {
     fn from(shortcode: &str) -> Self {
         ShortCode(shortcode.to_owned())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new() {
+        let shortcode = ShortCode::new();
+        assert_eq!(shortcode.0.len(), 10);
+    }
+
+    #[test]
+    fn test_as_str() {
+        let shortcode = ShortCode::from("abcd1234ef");
+        assert_eq!(shortcode.as_str(), "abcd1234ef");
+    }
+
+    #[test]
+    fn test_into_inner() {
+        let shortcode = ShortCode::from("abcd1234ef");
+        let inner = shortcode.into_inner();
+        assert_eq!(inner, "abcd1234ef");
+    }
+
+    #[test]
+    fn test_default() {
+        let shortcode = ShortCode::default();
+        assert_eq!(shortcode.0.len(), 10);
+    }
+
+    #[test]
+    fn test_from_string() {
+        let shortcode = ShortCode::from("abcd1234ef");
+        let string: String = shortcode.into();
+        assert_eq!(string, "abcd1234ef");
+    }
+
+    #[test]
+    fn test_from_str() {
+        let shortcode = ShortCode::from("abcd1234ef");
+        let shortcode_from_str = ShortCode::from(shortcode.as_str());
+        assert_eq!(shortcode, shortcode_from_str);
     }
 }
