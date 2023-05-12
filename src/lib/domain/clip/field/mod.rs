@@ -12,3 +12,6 @@ pub use title::Title;
 
 mod posted;
 pub use posted::Posted;
+
+mod expires;
+pub use expires::Expires;

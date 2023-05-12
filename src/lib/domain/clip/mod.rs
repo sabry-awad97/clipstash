@@ -6,4 +6,5 @@ pub struct Clip {
     pub content: field::Content,
     pub title: field::Title,
     pub posted: field::Posted,
+    pub expires: field::Expires,
 }
