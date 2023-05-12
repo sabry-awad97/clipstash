@@ -6,3 +6,6 @@ pub use shortcode::ShortCode;
 
 mod content;
 pub use content::Content;
+
+mod title;
+pub use title::Title;
