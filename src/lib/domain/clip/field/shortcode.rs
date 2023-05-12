@@ -27,3 +27,21 @@ impl ShortCode {
         self.0
     }
 }
+
+impl Default for ShortCode {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl From<ShortCode> for String {
+    fn from(shortcode: ShortCode) -> Self {
+        shortcode.0
+    }
+}
+
+impl From<&str> for ShortCode {
+    fn from(shortcode: &str) -> Self {
+        ShortCode(shortcode.to_owned())
+    }
+}
