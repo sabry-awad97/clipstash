@@ -33,3 +33,28 @@ impl FromStr for Expires {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_new() {
+        let expires = Expires::new(Some(Time::from_seconds(3600)));
+        assert_eq!(expires.into_inner(), Some(Time::from_seconds(3600)));
+
+        let expires = Expires::new(None);
+        assert_eq!(expires.into_inner(), None);
+    }
+
+    #[test]
+    fn test_default() {
+        let expires = Expires::default();
+        assert_eq!(expires.into_inner(), None);
+    }
+
+    #[test]
+    fn test_from_str() {
+        let expires = Expires::from_str("");
+        assert_eq!(expires.unwrap().into_inner(), None);
+    }
+}
