@@ -17,4 +17,12 @@ impl Password {
             None => Ok(Self(None)),
         }
     }
+
+    pub fn into_inner(self) -> Option<String> {
+        self.0
+    }
+
+    pub fn has_password(&self) -> bool {
+        self.0.is_some()
+    }
 }
