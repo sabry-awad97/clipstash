@@ -31,6 +31,13 @@ mod tests {
     }
 
     #[test]
+    fn test_empty_content() {
+        let result = Content::from_str("");
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err(), ClipError::EmptyContent);
+    }
+
+    #[test]
     fn test_into_inner() {
         let content = Content::from_str("Hello, world!").unwrap();
         let inner = content.into_inner();
