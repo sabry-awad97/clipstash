@@ -1,9 +1,9 @@
 use chrono::{DateTime, NaiveDateTime, Utc};
 use derive_more::From;
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-#[derive(Clone, Debug, From, PartialEq)]
+#[derive(Clone, Debug, From, PartialEq, Serialize, Deserialize)]
 pub struct Time(DateTime<Utc>);
 
 impl Time {
@@ -30,31 +30,10 @@ impl FromStr for Time {
     }
 }
 
-impl Serialize for Time {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.0.to_rfc3339())
-    }
-}
-
-impl<'de> Deserialize<'de> for Time {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let s = String::deserialize(deserializer)?;
-        let datetime = DateTime::parse_from_rfc3339(&s)
-            .map_err(|e| serde::de::Error::custom(format!("invalid datetime: {}", e)))?;
-        Ok(Time(datetime.with_timezone(&Utc)))
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::{NaiveDate, NaiveTime, TimeZone};
+    use chrono::{NaiveDate, NaiveTime, SecondsFormat, TimeZone};
 
     #[test]
     fn test_into_inner() {
@@ -96,7 +75,10 @@ mod tests {
     fn test_time_serialize() {
         let datetime = Utc::now();
         let time = Time(datetime);
-        let expected_json = format!("\"{}\"", datetime.to_rfc3339());
+        let expected_json = format!(
+            "\"{}\"",
+            datetime.to_rfc3339_opts(SecondsFormat::Nanos, true)
+        );
         let serialized_json = serde_json::to_string(&time).unwrap();
         assert_eq!(serialized_json, expected_json);
     }
