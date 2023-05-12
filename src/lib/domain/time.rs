@@ -29,3 +29,45 @@ impl FromStr for Time {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::{NaiveDate, NaiveTime, TimeZone};
+
+    #[test]
+    fn test_into_inner() {
+        let datetime = Utc::now();
+        let time = Time(datetime);
+        assert_eq!(time.into_inner(), datetime);
+    }
+
+    #[test]
+    fn test_timestamp() {
+        let datetime = Utc::now();
+        let time = Time(datetime);
+        assert_eq!(time.timestamp(), datetime.timestamp());
+    }
+
+    #[test]
+    fn test_from_naive_utc() {
+        let d = NaiveDate::from_ymd_opt(1997, 5, 1).unwrap();
+        let t = NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();
+
+        let naive_datetime = NaiveDateTime::new(d, t);
+        let datetime = Utc.from_utc_datetime(&naive_datetime);
+        let time = Time::from_naive_utc(naive_datetime);
+        assert_eq!(time.into_inner(), datetime);
+    }
+
+    #[test]
+    fn test_from_str() {
+        let time_str = "1997-05-01";
+        let dt: NaiveDateTime = NaiveDate::from_ymd_opt(1997, 5, 1)
+            .unwrap()
+            .and_hms_opt(0, 0, 0)
+            .unwrap();
+        let expected_time = Time::from_naive_utc(dt);
+        assert_eq!(time_str.parse::<Time>().unwrap(), expected_time);
+    }
+}
