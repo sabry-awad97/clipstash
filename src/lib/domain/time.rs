@@ -33,7 +33,7 @@ impl FromStr for Time {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::{NaiveDate, NaiveTime, TimeZone};
+    use chrono::{NaiveDate, NaiveTime, SecondsFormat, TimeZone};
 
     #[test]
     fn test_into_inner() {
@@ -69,5 +69,26 @@ mod tests {
             .unwrap();
         let expected_time = Time::from_naive_utc(dt);
         assert_eq!(time_str.parse::<Time>().unwrap(), expected_time);
+    }
+
+    #[test]
+    fn test_time_serialize() {
+        let datetime = Utc::now();
+        let time = Time(datetime);
+        let expected_json = format!(
+            "\"{}\"",
+            datetime.to_rfc3339_opts(SecondsFormat::Nanos, true)
+        );
+        let serialized_json = serde_json::to_string(&time).unwrap();
+        assert_eq!(serialized_json, expected_json);
+    }
+
+    #[test]
+    fn test_time_deserialize() {
+        let datetime = Utc::now();
+        let time = Time(datetime);
+        let json = format!("\"{}\"", datetime.to_rfc3339());
+        let deserialized_time: Time = serde_json::from_str(&json).unwrap();
+        assert_eq!(deserialized_time, time);
     }
 }
