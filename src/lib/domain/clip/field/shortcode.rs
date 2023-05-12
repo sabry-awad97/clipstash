@@ -1,6 +1,7 @@
+use derive_more::From;
 use rand::{seq::SliceRandom, thread_rng};
 use serde::{Deserialize, Serialize};
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, From)]
 pub struct ShortCode(String);
 
 impl ShortCode {
@@ -77,7 +78,7 @@ mod tests {
 
     #[test]
     fn test_from_string() {
-        let shortcode = ShortCode::from("abcd1234ef");
+        let shortcode = ShortCode::from("abcd1234ef".to_string());
         let string: String = shortcode.into();
         assert_eq!(string, "abcd1234ef");
     }
