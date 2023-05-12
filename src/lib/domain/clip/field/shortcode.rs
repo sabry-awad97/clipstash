@@ -18,4 +18,12 @@ impl ShortCode {
         }
         Self(shortcode)
     }
+
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+
+    pub fn into_inner(self) -> String {
+        self.0
+    }
 }
