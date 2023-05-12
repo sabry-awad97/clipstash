@@ -26,3 +26,16 @@ impl Password {
         self.0.is_some()
     }
 }
+
+impl Default for Password {
+    fn default() -> Self {
+        Self(None)
+    }
+}
+
+impl std::str::FromStr for Password {
+    type Err = ClipError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::new(s.to_string())
+    }
+}
