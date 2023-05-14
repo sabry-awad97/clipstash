@@ -75,6 +75,8 @@ impl FromStr for DbId {
 
 #[cfg(test)]
 mod tests {
+    use sqlx::Row;
+
     use super::*;
 
     #[test]
@@ -108,5 +110,27 @@ mod tests {
     async fn test_database_new() {
         let db = Database::new(":memory:").await;
         assert!(!db.get_pool().is_closed());
+    }
+
+    #[tokio::test]
+    async fn test_database_query() {
+        let db = Database::new(":memory:").await;
+        let mut conn = db.get_pool().acquire().await.unwrap();
+        sqlx::query("CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)")
+            .execute(&mut conn)
+            .await
+            .unwrap();
+        sqlx::query("INSERT INTO users (name) VALUES (?)")
+            .bind("Alice")
+            .execute(&mut conn)
+            .await
+            .unwrap();
+        let row = sqlx::query("SELECT * FROM users WHERE name = ?")
+            .bind("Alice")
+            .fetch_one(&mut conn)
+            .await
+            .unwrap();
+        let name: String = row.get("name");
+        assert_eq!(name, "Alice");
     }
 }
