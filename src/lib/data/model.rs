@@ -1,6 +1,6 @@
 use std::convert::TryFrom;
 
-use chrono::{NaiveDateTime, Utc};
+use chrono::NaiveDateTime;
 
 use crate::data::DbId;
 use crate::{ClipError, ShortCode, Time};
