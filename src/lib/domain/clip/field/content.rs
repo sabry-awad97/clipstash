@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 pub struct Content(String);
 
 impl Content {
-    pub fn from_str(content: &str) -> Result<Self, ClipError> {
+    pub fn new(content: &str) -> Result<Self, ClipError> {
         if !content.trim().is_empty() {
             Ok(Self(content.to_owned()))
         } else {
@@ -26,20 +26,20 @@ mod tests {
 
     #[test]
     fn test_new_content() {
-        let content = Content::from_str("Hello, world!").unwrap();
+        let content = Content::new("Hello, world!").unwrap();
         assert_eq!(content.as_str(), "Hello, world!");
     }
 
     #[test]
     fn test_empty_content() {
-        let result = Content::from_str("");
+        let result = Content::new("");
         assert!(result.is_err());
         assert_eq!(result.unwrap_err(), ClipError::EmptyContent);
     }
 
     #[test]
     fn test_into_inner() {
-        let content = Content::from_str("Hello, world!").unwrap();
+        let content = Content::new("Hello, world!").unwrap();
         let inner = content.into_inner();
         assert_eq!(inner, "Hello, world!");
     }
