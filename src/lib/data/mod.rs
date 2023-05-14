@@ -113,7 +113,15 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_database_query() {
+    async fn test_database_query_simple() {
+        // Test that a query can be executed on the database
+        let db = Database::new(":memory:").await;
+        let result = sqlx::query("SELECT 1 + 1").fetch_one(db.get_pool()).await;
+        assert_eq!(result.unwrap().get::<i32, _>(0), 2);
+    }
+
+    #[tokio::test]
+    async fn test_database_query_complex() {
         let db = Database::new(":memory:").await;
         let mut conn = db.get_pool().acquire().await.unwrap();
         sqlx::query("CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)")
