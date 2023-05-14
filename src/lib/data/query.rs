@@ -84,7 +84,7 @@ mod tests {
     use uuid::Uuid;
 
     #[tokio::test]
-    async fn test_insert_and_get_clip() {
+    async fn test_insert_update_and_get_clip() {
         let db = Database::new("sqlite::memory:").await;
         let pool = db.get_pool();
         sqlx::migrate!("./migrations").run(pool).await.unwrap();
@@ -106,5 +106,19 @@ mod tests {
 
         assert_eq!(retrieved_clip.clip_id, inserted_clip.clip_id);
         assert_eq!(retrieved_clip.hits, 0);
+
+        let updated_clip = model::UpdateClip {
+            shortcode: "abcd1234".to_string(),
+            content: "Updated content".to_string(),
+            title: Some("Updated title".to_string()),
+            expires: Some((Utc::now() + Duration::days(2)).timestamp()),
+            password: None,
+        };
+
+        let updated_clip = update_clip(updated_clip, &pool).await.unwrap();
+        assert_eq!(updated_clip.content, "Updated content");
+        assert_eq!(updated_clip.title, Some("Updated title".to_string()));
+        assert_eq!(updated_clip.password, None);
+        assert_eq!(updated_clip.hits, 0);
     }
 }
