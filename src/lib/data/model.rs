@@ -36,3 +36,49 @@ impl TryFrom<Clip> for crate::domain::Clip {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::domain::clip::field::*;
+    use std::str::FromStr;
+
+    #[test]
+    fn test_try_from_clip() {
+        let id_str = "01234567-89ab-cdef-0123-456789abcdef";
+        let clip = Clip {
+            clip_id: id_str.to_string(),
+            shortcode: "abc123".to_string(),
+            content: "Hello, world!".to_string(),
+            title: Some("Test Clip".to_string()),
+            posted: NaiveDateTime::from_timestamp_opt(862070800, 0).unwrap(),
+            expires: NaiveDateTime::from_timestamp_opt(862060800, 0),
+            password: Some("password".to_string()),
+            hits: 10,
+        };
+
+        let result = crate::domain::Clip::try_from(clip).unwrap();
+
+        assert_eq!(result.clip_id, ClipId::new(DbId::from_str(id_str).unwrap()));
+        assert_eq!(result.shortcode, ShortCode::from("abc123"));
+        assert_eq!(result.content, Content::new("Hello, world!").unwrap());
+        assert_eq!(result.title, Title::new(Some("Test Clip".to_string())));
+        assert_eq!(
+            result.posted,
+            Posted::new(Time::from_naive_utc(
+                NaiveDateTime::from_timestamp_opt(862070800, 0).unwrap()
+            ))
+        );
+        assert_eq!(
+            result.expires,
+            Expires::new(Time::from_naive_utc(
+                NaiveDateTime::from_timestamp_opt(862060800, 0).unwrap()
+            ))
+        );
+        assert_eq!(
+            result.password,
+            Password::new("password".to_string()).unwrap()
+        );
+        assert_eq!(result.hits, Hits::new(10));
+    }
+}
