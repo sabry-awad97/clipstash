@@ -32,3 +32,32 @@ impl From<&str> for GetClip {
         Self::from_raw(raw)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_from_raw() {
+        let shortcode = "abc123";
+        let get_clip = GetClip::from_raw(shortcode);
+        assert_eq!(get_clip.shortcode, ShortCode::from(shortcode));
+        assert_eq!(get_clip.password, field::Password::default());
+    }
+
+    #[test]
+    fn test_from_shortcode() {
+        let shortcode = ShortCode::from("abc123");
+        let get_clip = GetClip::from(shortcode.clone());
+        assert_eq!(get_clip.shortcode, shortcode);
+        assert_eq!(get_clip.password, field::Password::default());
+    }
+
+    #[test]
+    fn test_from_str() {
+        let shortcode = "abc123";
+        let get_clip = GetClip::from(shortcode);
+        assert_eq!(get_clip.shortcode, ShortCode::from(shortcode));
+        assert_eq!(get_clip.password, field::Password::default());
+    }
+}
