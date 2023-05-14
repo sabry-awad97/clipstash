@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use derive_more::{Display, From};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -24,5 +26,12 @@ impl From<DbId> for String {
 impl Default for DbId {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl FromStr for DbId {
+    type Err = uuid::Error;
+    fn from_str(id: &str) -> Result<Self, Self::Err> {
+        Ok(DbId(Uuid::parse_str(id)?))
     }
 }
