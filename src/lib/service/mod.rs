@@ -1,3 +1,5 @@
+pub mod ask;
+
 use crate::{ClipError, DataError};
 
 #[derive(Debug, thiserror::Error)]
