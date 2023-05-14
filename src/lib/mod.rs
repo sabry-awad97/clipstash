@@ -7,3 +7,4 @@ pub use data::DataError;
 pub use domain::clip::field::ShortCode;
 pub use domain::clip::{Clip, ClipError};
 pub use domain::time::Time;
+pub use service::ServiceError;
