@@ -55,8 +55,9 @@ pub async fn insert_clip<M: Into<model::NewClip>>(
 mod tests {
     use super::*;
     use crate::data::model::Clip;
-    use chrono::NaiveDateTime;
-    use sqlx::{Pool, Sqlite};
+    use chrono::{Duration, NaiveDateTime, Utc};
+    use sqlx::{Pool, Sqlite, SqlitePool};
+    use uuid::Uuid;
 
     const CLIP_ID: &str = "01234567-89ab-cdef-0123-456789abcdef";
 
@@ -80,7 +81,7 @@ mod tests {
             hits: 10,
         };
 
-        insert_clip(&clip, &pool).await.unwrap();
+        insert_clip_helper(&clip, &pool).await.unwrap();
 
         // Test getting the clip by shortcode
         let result = get_clip(
@@ -94,7 +95,7 @@ mod tests {
         assert_eq!(result.clip_id, clip.clip_id);
     }
 
-    async fn insert_clip(clip: &Clip, pool: &Pool<Sqlite>) -> sqlx::Result<()> {
+    async fn insert_clip_helper(clip: &Clip, pool: &Pool<Sqlite>) -> sqlx::Result<()> {
         sqlx::query!(
             r#"INSERT INTO
                 clips (
@@ -120,5 +121,36 @@ mod tests {
         .execute(pool)
         .await
         .map(|_| ())
+    }
+
+    #[tokio::test]
+    async fn test_insert_and_get_clip() {
+        let pool = SqlitePool::connect("sqlite::memory:").await.unwrap();
+        sqlx::migrate!("./migrations").run(&pool).await.unwrap();
+
+        let clip_id = Uuid::new_v4().to_string();
+        let shortcode = "abcd1234".to_string();
+        let content = "Hello, world!".to_string();
+        let title = Some("Test Clip".to_string());
+        let posted = Utc::now();
+        let expires = posted + Duration::days(7);
+        let password = Some("password".to_string());
+
+        let new_clip = model::NewClip {
+            clip_id,
+            shortcode: shortcode.clone(),
+            content,
+            title,
+            posted: posted.timestamp(),
+            expires: Some(expires.timestamp()),
+            password,
+        };
+
+        let inserted_clip = insert_clip(new_clip, &pool).await.unwrap();
+        
+        let retrieved_clip = get_clip(shortcode, &pool).await.unwrap();
+        
+        assert_eq!(retrieved_clip.clip_id, inserted_clip.clip_id);
+        assert_eq!(retrieved_clip.hits, 0);
     }
 }
