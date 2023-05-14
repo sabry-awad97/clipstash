@@ -103,4 +103,10 @@ mod tests {
         let id = DbId::from_str(id_str).unwrap();
         assert_eq!(String::from(id), id_str);
     }
+
+    #[tokio::test]
+    async fn test_database_new() {
+        let db = Database::new(":memory:").await;
+        assert!(!db.get_pool().is_closed());
+    }
 }
