@@ -41,6 +41,20 @@ pub struct GetClip {
     pub(in crate::data) shortcode: String,
 }
 
+impl From<String> for GetClip {
+    fn from(shortcode: String) -> Self {
+        GetClip { shortcode }
+    }
+}
+
+impl From<ShortCode> for GetClip {
+    fn from(shortcode: ShortCode) -> Self {
+        GetClip {
+            shortcode: shortcode.into_inner(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
