@@ -7,6 +7,10 @@ pub async fn new_clip(req: ask::NewClip, pool: &DatabasePool) -> Result<Clip, Se
     Ok(query::insert_clip(req, pool).await?.try_into()?)
 }
 
+pub async fn update_clip(req: ask::UpdateClip, pool: &DatabasePool) -> Result<Clip, ServiceError> {
+    Ok(query::update_clip(req, pool).await?.try_into()?)
+}
+
 pub async fn get_clip(req: ask::GetClip, pool: &DatabasePool) -> Result<Clip, ServiceError> {
     let user_password = req.password.clone();
     let clip: Clip = query::get_clip(req, pool).await?.try_into()?;
