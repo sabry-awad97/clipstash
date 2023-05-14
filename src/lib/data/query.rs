@@ -19,6 +19,38 @@ pub async fn get_clip<M: Into<model::GetClip>>(
     .await?)
 }
 
+pub async fn insert_clip<M: Into<model::NewClip>>(
+    model: M,
+    pool: &DatabasePool,
+) -> Result<model::Clip> {
+    let model = model.into();
+    sqlx::query!(
+        r#"INSERT INTO
+            clips (
+                clip_id,
+                shortcode,
+                content,
+                title,
+                posted,
+                expires,
+                password,
+                hits
+            )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)"#,
+        model.clip_id,
+        model.shortcode,
+        model.content,
+        model.title,
+        model.posted,
+        model.expires,
+        model.password,
+        0
+    )
+    .execute(pool)
+    .await?;
+    get_clip(model.shortcode, pool).await
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
