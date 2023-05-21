@@ -44,3 +44,20 @@ impl PageContext for ViewClip {
         "base"
     }
 }
+
+#[derive(Debug, Serialize, Constructor)]
+pub struct PasswordRequired {
+    shortcode: crate::ShortCode,
+}
+
+impl PageContext for PasswordRequired {
+    fn template_path(&self) -> &str {
+        "clip_need_password"
+    }
+    fn title(&self) -> &str {
+        "Password Required"
+    }
+    fn parent(&self) -> &str {
+        "base"
+    }
+}
