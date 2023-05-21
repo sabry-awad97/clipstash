@@ -1,0 +1,29 @@
+use derive_more::Constructor;
+use serde::Serialize;
+
+pub trait PageContext {
+    fn title(&self) -> &str;
+    fn template_path(&self) -> &str;
+    fn parent(&self) -> &str;
+}
+
+#[derive(Debug, Serialize)]
+pub struct Home {}
+
+impl Default for Home {
+    fn default() -> Self {
+        Self {}
+    }
+}
+
+impl PageContext for Home {
+    fn template_path(&self) -> &str {
+        "home"
+    }
+    fn title(&self) -> &str {
+        "Stash Your Clipboard!"
+    }
+    fn parent(&self) -> &str {
+        "base"
+    }
+}
