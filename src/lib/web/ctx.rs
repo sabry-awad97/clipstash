@@ -27,3 +27,20 @@ impl PageContext for Home {
         "base"
     }
 }
+
+#[derive(Debug, Serialize, Constructor)]
+pub struct ViewClip {
+    pub clip: crate::Clip,
+}
+
+impl PageContext for ViewClip {
+    fn template_path(&self) -> &str {
+        "clip"
+    }
+    fn title(&self) -> &str {
+        "View Clip"
+    }
+    fn parent(&self) -> &str {
+        "base"
+    }
+}
