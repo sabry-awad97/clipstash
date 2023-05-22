@@ -30,6 +30,17 @@ pub async fn get_clip<M: Into<model::GetClip>>(
     .await?)
 }
 
+/// Inserts a new clip into the database based on the provided model and database connection pool.
+///
+/// # Arguments
+///
+/// * `model` - The model representing the new clip to insert.
+/// * `pool` - The database connection pool.
+///
+/// # Returns
+///
+/// A `Result` containing the inserted clip on success, or an error on failure.
+///
 pub async fn insert_clip<M: Into<model::NewClip>>(
     model: M,
     pool: &DatabasePool,
