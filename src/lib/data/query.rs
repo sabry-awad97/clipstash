@@ -4,6 +4,17 @@ use crate::data::{DataError, DatabasePool};
 
 type Result<T> = std::result::Result<T, DataError>;
 
+/// Retrieves a clip from the database based on the provided model and database connection pool.
+///
+/// # Arguments
+///
+/// * `model` - The model representing the clip to retrieve.
+/// * `pool` - The database connection pool.
+///
+/// # Returns
+///
+/// A `Result` containing the retrieved clip on success, or an error on failure.
+///
 pub async fn get_clip<M: Into<model::GetClip>>(
     model: M,
     pool: &DatabasePool,
