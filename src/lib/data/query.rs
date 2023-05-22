@@ -73,6 +73,17 @@ pub async fn insert_clip<M: Into<model::NewClip>>(
     get_clip(model.shortcode, pool).await
 }
 
+/// Updates an existing clip in the database based on the provided model and database connection pool.
+///
+/// # Arguments
+///
+/// * `model` - The model representing the clip to update.
+/// * `pool` - The database connection pool.
+///
+/// # Returns
+///
+/// A `Result` containing the updated clip on success, or an error on failure.
+///
 pub async fn update_clip<M: Into<model::UpdateClip>>(
     model: M,
     pool: &DatabasePool,
