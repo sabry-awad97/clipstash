@@ -48,6 +48,25 @@ impl<'r> Renderer<'r> {
         rendered.expect("Failed to render template")
     }
 
+    pub fn render_with_data<P, D>(&self, context: P, data: (&str, D), errors: &[&str]) -> String
+    where
+        P: ctx::PageContext + serde::Serialize + std::fmt::Debug,
+        D: serde::Serialize + std::fmt::Debug,
+    {
+        use handlebars::to_json;
+
+        let mut value = convert_to_value(&context);
+        if let Some(value) = value.as_object_mut() {
+            value.insert("_errors".into(), errors.into());
+            value.insert("_title".into(), context.title().into());
+            value.insert("_base".into(), context.parent().into());
+            value.insert(data.0.into(), to_json(data.1));
+        }
+
+        let rendered = self.do_render(context.template_path(), &value);
+        rendered.expect("Failed to render template with data")
+    }
+
     fn do_render(
         &self,
         template_name: &str,
