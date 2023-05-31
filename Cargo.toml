@@ -14,6 +14,7 @@ chrono = { version = "0.4.24", features = ["serde"]}
 derive_more = "0.99.17"
 handlebars = { version = "4.3.7", features = ["dir_source"] }
 rand = "0.8.5"
+rocket = { version = "0.5.0-rc.3", features = ["json"] }
 serde = { version = "1.0.163", features = ["derive"] }
 serde_json = "1.0.96"
 sqlx = { version = "0.6.3", features = ["sqlite", "runtime-tokio-rustls", "macros", "chrono", "uuid"] }
