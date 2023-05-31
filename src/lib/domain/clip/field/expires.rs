@@ -1,4 +1,5 @@
 use crate::domain::{clip::ClipError, time::Time};
+use rocket::form;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
@@ -34,8 +35,22 @@ impl FromStr for Expires {
     }
 }
 
+#[rocket::async_trait]
+impl<'r> form::FromFormField<'r> for Expires {
+    fn from_value(field: form::ValueField<'r>) -> form::Result<'r, Self> {
+        if field.value.trim().is_empty() {
+            Ok(Self(None))
+        } else {
+            Ok(Self::from_str(field.value)
+                .map_err(|e| form::Error::validation(format!("{}", e)))?)
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use rocket::form::FromFormField;
+
     use super::*;
     #[test]
     fn test_new() {
@@ -48,7 +63,7 @@ mod tests {
 
     #[test]
     fn test_default() {
-        let expires = Expires::default();
+        let expires = <Expires as std::default::Default>::default();
         assert_eq!(expires.into_inner(), None);
     }
 
@@ -56,5 +71,14 @@ mod tests {
     fn test_from_str() {
         let expires = Expires::from_str("");
         assert_eq!(expires.unwrap().into_inner(), None);
+    }
+
+    #[test]
+    fn test_from_value() {
+        let field = form::ValueField::parse("expires=1997-05-01");
+        let result = Expires::from_value(field);
+        let expected = Expires::from_str("1997-05-01").unwrap();
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), expected);
     }
 }

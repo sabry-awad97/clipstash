@@ -1,4 +1,5 @@
 use crate::domain::clip::ClipError;
+use rocket::form;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -20,8 +21,17 @@ impl Content {
     }
 }
 
+#[rocket::async_trait]
+impl<'r> form::FromFormField<'r> for Content {
+    fn from_value(field: form::ValueField<'r>) -> form::Result<'r, Self> {
+        Ok(Self::new(field.value).map_err(|e| form::Error::validation(format!("{}", e)))?)
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use rocket::form::{self, FromFormField};
+
     use super::*;
 
     #[test]
@@ -42,5 +52,14 @@ mod tests {
         let content = Content::new("Hello, world!").unwrap();
         let inner = content.into_inner();
         assert_eq!(inner, "Hello, world!");
+    }
+
+    #[test]
+    fn test_from_value() {
+        let field = form::ValueField::parse("content=Hello, world!");
+        let expected = Content::new("Hello, world!").unwrap();
+        let result = Content::from_value(field);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), expected);
     }
 }

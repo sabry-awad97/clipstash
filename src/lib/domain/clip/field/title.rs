@@ -1,4 +1,5 @@
 use crate::domain::clip::ClipError;
+use rocket::form;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
@@ -37,8 +38,17 @@ impl FromStr for Title {
     }
 }
 
+#[rocket::async_trait]
+impl<'r> form::FromFormField<'r> for Title {
+    fn from_value(field: form::ValueField<'r>) -> form::Result<'r, Self> {
+        Ok(Self::new(field.value.to_owned()))
+    }
+}
+
 #[cfg(test)]
 mod tests {
+
+    use rocket::form::FromFormField;
 
     use super::*;
 
@@ -62,7 +72,7 @@ mod tests {
 
     #[test]
     fn test_default_title() {
-        let title = Title::default();
+        let title = <Title as std::default::Default>::default();
         assert_eq!(title.into_inner(), None);
     }
 
@@ -82,5 +92,14 @@ mod tests {
     fn test_from_str_with_none() {
         let title = Title::from_str("None").unwrap();
         assert_eq!(title.into_inner(), Some("None".to_string()));
+    }
+
+    #[test]
+    fn test_from_value() {
+        let field = form::ValueField::parse("title=Title");
+        let result = Title::from_value(field);
+        let expected = Title::from_str("Title").unwrap();
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), expected);
     }
 }
