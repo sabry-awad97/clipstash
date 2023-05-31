@@ -1,3 +1,4 @@
+use serde::Serialize;
 use std::path::PathBuf;
 use thiserror::Error;
 
@@ -46,6 +47,13 @@ impl<'r> Renderer<'r> {
     }
 }
 
+fn convert_to_value<S>(value: &S) -> serde_json::Value
+where
+    S: Serialize,
+{
+    serde_json::to_value(value).expect("Failed to convert to JSON value")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -77,5 +85,27 @@ mod tests {
             .do_render("template", &json!({"name": "World"}))
             .unwrap();
         assert_eq!(result, "Hello, World!");
+    }
+
+    #[test]
+    fn test_convert_to_value() {
+        #[derive(Serialize)]
+        struct User {
+            name: String,
+            age: u32,
+        }
+
+        let user = User {
+            name: "John".to_string(),
+            age: 30,
+        };
+
+        let expected_value = json!({
+            "name": "John",
+            "age": 30,
+        });
+
+        let value = convert_to_value(&user);
+        assert_eq!(value, expected_value);
     }
 }
