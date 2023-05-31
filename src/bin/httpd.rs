@@ -1,7 +1,6 @@
 use clipstash::data::AppDatabase;
 use clipstash::web::renderer::Renderer;
 use dotenv::dotenv;
-use std::error::Error;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
@@ -26,15 +25,13 @@ pub struct Httpd {
     pub template_directory: PathBuf,
 }
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+#[rocket::launch]
+async fn rocket() -> _ {
     dotenv().ok();
     let opt = Httpd::from_args();
     let renderer = Renderer::new(opt.template_directory.clone());
     let database = AppDatabase::new(&opt.connection_string).await;
 
     let config = clipstash::RocketConfig { renderer, database };
-    clipstash::rocket(config).launch().await?;
-
-    Ok(())
+    clipstash::rocket(config)
 }
