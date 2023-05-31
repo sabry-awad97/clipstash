@@ -2,6 +2,8 @@ use serde::Serialize;
 use std::path::PathBuf;
 use thiserror::Error;
 
+use super::ctx;
+
 #[derive(Error, Debug)]
 pub enum RendererError {
     #[error("Failed to get handlebars template {template_name}: {source}")]
@@ -31,7 +33,22 @@ impl<'r> Renderer<'r> {
         Ok(Self(handlebars))
     }
 
-    pub fn do_render(
+    pub fn render<P>(&self, context: P, errors: &[&str]) -> String
+    where
+        P: ctx::PageContext + serde::Serialize + std::fmt::Debug,
+    {
+        let mut value = convert_to_value(&context);
+        if let Some(value) = value.as_object_mut() {
+            value.insert("_errors".into(), errors.into());
+            value.insert("_title".into(), context.title().into());
+            value.insert("_base".into(), context.parent().into());
+        }
+
+        let rendered = self.do_render(context.template_path(), &value);
+        rendered.expect("Failed to render template")
+    }
+
+    fn do_render(
         &self,
         template_name: &str,
         context: &serde_json::Value,
