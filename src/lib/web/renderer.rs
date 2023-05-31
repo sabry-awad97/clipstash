@@ -21,7 +21,11 @@ pub enum RendererError {
 pub struct Renderer<'r>(handlebars::Handlebars<'r>);
 
 impl<'r> Renderer<'r> {
-    pub fn new(template_dir: PathBuf) -> Result<Self, RendererError> {
+    pub fn new(template_dir: PathBuf) -> Self {
+        Self::new_inner(template_dir).expect("Failed to register handlebars templates")
+    }
+
+    fn new_inner(template_dir: PathBuf) -> Result<Self, RendererError> {
         let mut handlebars = handlebars::Handlebars::new();
         handlebars
             .register_templates_directory(".hbs", &template_dir)
@@ -105,7 +109,7 @@ mod tests {
         let mut file = File::create(&template_file).unwrap();
         file.write_all(b"Hello, {{name}}!").unwrap();
 
-        let renderer = Renderer::new(template_dir.path().to_path_buf()).unwrap();
+        let renderer = Renderer::new_inner(template_dir.path().to_path_buf()).unwrap();
         assert!(renderer.0.get_template("template").is_some());
     }
 
@@ -116,7 +120,7 @@ mod tests {
         let mut file = File::create(&template_file).unwrap();
         file.write_all(b"Hello, {{name}}!").unwrap();
 
-        let renderer = Renderer::new(template_dir.path().to_path_buf()).unwrap();
+        let renderer = Renderer::new_inner(template_dir.path().to_path_buf()).unwrap();
         let result = renderer
             .do_render("template", &json!({"name": "World"}))
             .unwrap();
