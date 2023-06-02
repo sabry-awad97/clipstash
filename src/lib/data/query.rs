@@ -7,6 +7,22 @@ use crate::{
 
 type Result<T> = std::result::Result<T, DataError>;
 
+pub async fn increase_hit_count(
+    shortcode: &ShortCode,
+    hits: u32,
+    pool: &DatabasePool,
+) -> Result<()> {
+    let shortcode = shortcode.as_str();
+    sqlx::query!(
+        "UPDATE clips SET hits = hits + ? WHERE shortcode = ?",
+        hits,
+        shortcode
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
 /// Retrieves a clip from the database based on the provided model and database connection pool.
 ///
 /// # Arguments
@@ -152,7 +168,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_insert_update_and_get_clip() {
+    async fn test_increase_hit_insert_update_and_get_clip() {
         let pool = create_test_pool().await;
 
         let shortcode = ShortCode::new();
@@ -165,12 +181,15 @@ mod tests {
         assert_eq!(retrieved_clip.clip_id, inserted_clip.clip_id);
         assert_eq!(retrieved_clip.hits, 0);
 
+        increase_hit_count(&shortcode, 1, &pool).await.unwrap();
+
         let updated_clip = model_update_clip(shortcode.as_str());
 
         let updated_clip = update_clip(updated_clip, &pool).await.unwrap();
         assert_eq!(updated_clip.content, "Updated content");
         assert_eq!(updated_clip.title, Some("Updated title".to_string()));
         assert_eq!(updated_clip.password, None);
-        assert_eq!(updated_clip.hits, 0);
+
+        assert_eq!(updated_clip.hits, 1);
     }
 }
