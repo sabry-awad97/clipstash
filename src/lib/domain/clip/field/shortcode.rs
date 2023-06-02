@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use derive_more::From;
 use rand::{seq::SliceRandom, thread_rng};
+use rocket::request::FromParam;
 use serde::{Deserialize, Serialize};
 
 use super::super::ClipError;
@@ -59,6 +60,14 @@ impl FromStr for ShortCode {
     }
 }
 
+impl<'r> FromParam<'r> for ShortCode {
+    type Error = &'r str;
+
+    fn from_param(param: &'r str) -> Result<Self, Self::Error> {
+        Ok(ShortCode::from(param))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -67,6 +76,10 @@ mod tests {
     fn test_new() {
         let shortcode = ShortCode::new();
         assert_eq!(shortcode.0.len(), 10);
+        assert!(shortcode
+            .0
+            .chars()
+            .all(|c| ['a', 'b', 'c', 'd', '1', '2', '3', '4'].contains(&c)));
     }
 
     #[test]
@@ -89,16 +102,29 @@ mod tests {
     }
 
     #[test]
-    fn test_from_string() {
-        let shortcode = ShortCode::from("abcd1234ef".to_string());
-        let string: String = shortcode.into();
-        assert_eq!(string, "abcd1234ef");
+    fn test_from() {
+        let shortcode = ShortCode::new();
+        let string: String = shortcode.clone().into();
+        assert_eq!(string.len(), 10);
+        assert!(string
+            .chars()
+            .all(|c| ['a', 'b', 'c', 'd', '1', '2', '3', '4'].contains(&c)));
+
+        let shortcode_from_str = ShortCode::from(shortcode.as_str());
+        assert_eq!(shortcode_from_str, shortcode);
     }
 
     #[test]
     fn test_from_str() {
-        let shortcode = ShortCode::from_str("abcd1234ef").unwrap();
-        let shortcode_from_str = ShortCode::from(shortcode.as_str());
-        assert_eq!(shortcode, shortcode_from_str);
+        let shortcode = ShortCode::new();
+        let shortcode_from_str = ShortCode::from_str(shortcode.as_str()).unwrap();
+        assert_eq!(shortcode_from_str, shortcode);
+    }
+
+    #[test]
+    fn test_from_param() {
+        let shortcode = ShortCode::new();
+        let shortcode_from_param = ShortCode::from_param(shortcode.as_str()).unwrap();
+        assert_eq!(shortcode_from_param, shortcode);
     }
 }
