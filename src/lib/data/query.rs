@@ -1,6 +1,9 @@
 use super::model;
 
-use crate::data::{DataError, DatabasePool};
+use crate::{
+    data::{DataError, DatabasePool},
+    ShortCode,
+};
 
 type Result<T> = std::result::Result<T, DataError>;
 
@@ -116,23 +119,45 @@ mod tests {
     use chrono::{Duration, Utc};
     use uuid::Uuid;
 
-    #[tokio::test]
-    async fn test_insert_update_and_get_clip() {
+    // Helper function to create a test database pool
+    async fn create_test_pool() -> DatabasePool {
         let db = Database::new("sqlite::memory:").await;
         let pool = db.get_pool();
-        sqlx::migrate!("./migrations").run(pool).await.unwrap();
+        sqlx::migrate!().run(pool).await.unwrap();
+        pool.clone()
+    }
+
+    fn model_new_clip(shortcode: &str) -> model::NewClip {
         let posted = Utc::now();
         let expires = posted + Duration::days(7);
-
-        let new_clip = model::NewClip {
+        model::NewClip {
             clip_id: Uuid::new_v4().to_string(),
-            shortcode: "abcd1234".to_string(),
+            shortcode: shortcode.to_string(),
             content: "Hello, world!".to_string(),
             title: Some("Test Clip".to_string()),
             posted: posted.timestamp(),
             expires: Some(expires.timestamp()),
             password: Some("password".to_string()),
-        };
+        }
+    }
+
+    fn model_update_clip(shortcode: &str) -> model::UpdateClip {
+        model::UpdateClip {
+            shortcode: shortcode.to_string(),
+            content: "Updated content".to_string(),
+            title: Some("Updated title".to_string()),
+            expires: Some((Utc::now() + Duration::days(2)).timestamp()),
+            password: None,
+        }
+    }
+
+    #[tokio::test]
+    async fn test_insert_update_and_get_clip() {
+        let pool = create_test_pool().await;
+
+        let shortcode = ShortCode::new();
+
+        let new_clip = model_new_clip(shortcode.as_str());
 
         let inserted_clip = insert_clip(new_clip, &pool).await.unwrap();
         let retrieved_clip = get_clip(inserted_clip.shortcode, &pool).await.unwrap();
@@ -140,13 +165,7 @@ mod tests {
         assert_eq!(retrieved_clip.clip_id, inserted_clip.clip_id);
         assert_eq!(retrieved_clip.hits, 0);
 
-        let updated_clip = model::UpdateClip {
-            shortcode: "abcd1234".to_string(),
-            content: "Updated content".to_string(),
-            title: Some("Updated title".to_string()),
-            expires: Some((Utc::now() + Duration::days(2)).timestamp()),
-            password: None,
-        };
+        let updated_clip = model_update_clip(shortcode.as_str());
 
         let updated_clip = update_clip(updated_clip, &pool).await.unwrap();
         assert_eq!(updated_clip.content, "Updated content");
