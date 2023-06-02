@@ -1,7 +1,35 @@
-use crate::data::{query, DatabasePool};
+use crate::data::{query, DatabasePool, Transaction};
 use crate::service::ask;
 use crate::{Clip, ServiceError, ShortCode};
 use std::convert::TryInto;
+
+/// Begins a new database transaction using the provided database pool.
+///
+/// # Arguments
+///
+/// * `pool` - A reference to the `DatabasePool` providing the database connection.
+///
+/// # Returns
+///
+/// Returns a `Result` containing a `Transaction` if the transaction is successfully started. Otherwise, returns a `ServiceError`.
+///
+pub async fn begin_transaction(pool: &DatabasePool) -> Result<Transaction<'_>, ServiceError> {
+    Ok(pool.begin().await?)
+}
+
+/// Ends the provided database transaction by committing the changes.
+///
+/// # Arguments
+///
+/// * `transaction` - The `Transaction` to be ended and committed.
+///
+/// # Returns
+///
+/// Returns `Ok(())` if the transaction is successfully ended and committed. Otherwise, returns a `ServiceError`.
+///
+pub async fn end_transaction(transaction: Transaction<'_>) -> Result<(), ServiceError> {
+    Ok(transaction.commit().await?)
+}
 
 /// Increases the hit count for a given clip shortcode by the specified number of hits.
 ///
