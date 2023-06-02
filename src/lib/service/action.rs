@@ -1,7 +1,27 @@
 use crate::data::{query, DatabasePool};
 use crate::service::ask;
-use crate::{Clip, ServiceError};
+use crate::{Clip, ServiceError, ShortCode};
 use std::convert::TryInto;
+
+/// Increases the hit count for a given clip shortcode by the specified number of hits.
+///
+/// # Arguments
+///
+/// * `shortcode` - A reference to the `ShortCode` representing the clip to increase the hit count for.
+/// * `hits` - The number of hits to increment the hit count by.
+/// * `pool` - A reference to the `DatabasePool` providing the database connection.
+///
+/// # Returns
+///
+/// Returns `Ok(())` if the hit count is successfully increased. Otherwise, returns a `ServiceError`.
+///
+pub async fn increase_hit_count(
+    shortcode: &ShortCode,
+    hits: u32,
+    pool: &DatabasePool,
+) -> Result<(), ServiceError> {
+    Ok(query::increase_hit_count(shortcode, hits, pool).await?)
+}
 
 /// Creates a new clip based on the provided request and inserts it into the database.
 ///
