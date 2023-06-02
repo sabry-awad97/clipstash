@@ -2,12 +2,14 @@ use std::str::FromStr;
 
 use derive_more::From;
 use rand::{seq::SliceRandom, thread_rng};
-use rocket::request::FromParam;
+use rocket::{request::FromParam, UriDisplayPath, UriDisplayQuery};
 use serde::{Deserialize, Serialize};
 
 use super::super::ClipError;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, From)]
+#[derive(
+    Debug, Clone, Serialize, Deserialize, PartialEq, From, UriDisplayPath, UriDisplayQuery,
+)]
 pub struct ShortCode(String);
 
 impl ShortCode {
