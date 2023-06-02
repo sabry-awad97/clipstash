@@ -1,6 +1,11 @@
+use std::str::FromStr;
+
 use derive_more::From;
 use rand::{seq::SliceRandom, thread_rng};
 use serde::{Deserialize, Serialize};
+
+use super::super::ClipError;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, From)]
 pub struct ShortCode(String);
 
@@ -47,6 +52,13 @@ impl From<&str> for ShortCode {
     }
 }
 
+impl FromStr for ShortCode {
+    type Err = ClipError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self(s.into()))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -85,7 +97,7 @@ mod tests {
 
     #[test]
     fn test_from_str() {
-        let shortcode = ShortCode::from("abcd1234ef");
+        let shortcode = ShortCode::from_str("abcd1234ef").unwrap();
         let shortcode_from_str = ShortCode::from(shortcode.as_str());
         assert_eq!(shortcode, shortcode_from_str);
     }
