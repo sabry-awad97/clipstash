@@ -166,6 +166,46 @@ pub async fn save_api_key(api_key: ApiKey, pool: &DatabasePool) -> Result<ApiKey
     Ok(api_key)
 }
 
+/// Represents the status of an API key revocation operation.
+///
+/// # Variants
+///
+/// * `Revoked` - Indicates that the API key was successfully revoked.
+/// * `NotFound` - Indicates that the API key was not found and could not be revoked.
+///
+pub enum RevocationStatus {
+    Revoked,
+    NotFound,
+}
+
+/// Revokes an API key in the database.
+///
+/// This function deletes the provided `api_key` from the `api_keys` table in the database.
+/// It returns a `RevocationStatus` indicating whether the key was successfully revoked or not found.
+///
+/// # Arguments
+///
+/// * `api_key` - An `ApiKey` representing the API key to revoke.
+/// * `pool` - A reference to a `DatabasePool` representing the connection pool to the database.
+///
+/// # Returns
+///
+/// Returns a `Result<RevocationStatus, DataError>` indicating success or an error if the revocation operation fails.
+/// If successful, it returns a `RevocationStatus` indicating whether the key was successfully revoked or not found.
+///
+pub async fn revoke_api_key(api_key: ApiKey, pool: &DatabasePool) -> Result<RevocationStatus> {
+    let bytes = api_key.clone().into_inner();
+    Ok(
+        sqlx::query!("DELETE FROM api_keys WHERE api_key == ?", bytes)
+            .execute(pool)
+            .await
+            .map(|result| match result.rows_affected() {
+                0 => RevocationStatus::NotFound,
+                _ => RevocationStatus::Revoked,
+            })?,
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use crate::data::Database;
