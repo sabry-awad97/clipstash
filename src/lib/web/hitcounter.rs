@@ -2,7 +2,6 @@ use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use crossbeam_channel::{unbounded, Sender, TryRecvError};
 use parking_lot::Mutex;
-use tokio::runtime::Handle;
 
 use crate::{data::DatabasePool, service, ServiceError, ShortCode};
 
@@ -26,11 +25,7 @@ pub struct HitCounter {
 }
 
 impl HitCounter {
-    fn commit_hits(
-        hits: HitStore,
-        handle: Handle,
-        pool: DatabasePool,
-    ) -> Result<(), HitCountError> {
+    async fn commit_hits(hits: HitStore, pool: DatabasePool) -> Result<(), HitCountError> {
         let hits = Arc::clone(&hits);
         let hits: Vec<(ShortCode, u32)> = {
             let mut hits = hits.lock();
@@ -39,25 +34,22 @@ impl HitCounter {
             hits_vec
         };
 
-        handle.block_on(async move {
-            let transaction = service::action::begin_transaction(&pool).await?;
-            for (shortcode, hits) in hits {
-                if let Err(e) = service::action::increase_hit_count(&shortcode, hits, &pool).await {
-                    eprintln!("error increasing hit count: {}", e);
-                }
+        let transaction = service::action::begin_transaction(&pool).await?;
+        for (shortcode, hits) in hits {
+            if let Err(e) = service::action::increase_hit_count(&shortcode, hits, &pool).await {
+                eprintln!("error increasing hit count: {}", e);
             }
-            Ok(service::action::end_transaction(transaction).await?)
-        })
+        }
+        Ok(service::action::end_transaction(transaction).await?)
     }
 
-    fn process_msg(
+    async fn process_msg(
         msg: HitCountMsg,
         hits: HitStore,
-        handle: Handle,
         pool: DatabasePool,
     ) -> Result<(), HitCountError> {
         match msg {
-            HitCountMsg::Commit => Self::commit_hits(hits, handle, pool)?,
+            HitCountMsg::Commit => Self::commit_hits(hits, pool).await?,
             HitCountMsg::Hit(shortcode, count) => {
                 let mut hitcount = hits.lock();
                 let hitcount = hitcount.entry(shortcode).or_insert(0);
@@ -67,24 +59,21 @@ impl HitCounter {
         Ok(())
     }
 
-    pub fn new(pool: &DatabasePool, handle: Handle) -> Self {
+    pub fn new(pool: &DatabasePool) -> Self {
         let (tx, rx) = unbounded();
         let tx_clone = tx.clone();
 
         let pool_clone = pool.clone();
-        let _ = std::thread::spawn(move || {
+        let _ = tokio::spawn(async move {
             println!("HitCounter thread spawned");
             let store: HitStore = Arc::new(Mutex::new(HashMap::new()));
 
             loop {
                 match rx.try_recv() {
                     Ok(msg) => {
-                        if let Err(e) = Self::process_msg(
-                            msg,
-                            store.clone(),
-                            handle.clone(),
-                            pool_clone.clone(),
-                        ) {
+                        if let Err(e) =
+                            Self::process_msg(msg, store.clone(), pool_clone.clone()).await
+                        {
                             eprintln!("message processing error: {}", e);
                         }
                     }
