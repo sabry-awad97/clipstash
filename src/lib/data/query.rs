@@ -238,6 +238,30 @@ pub async fn api_key_is_valid(api_key: ApiKey, pool: &DatabasePool) -> Result<bo
     )
 }
 
+/// Deletes expired clips from the database.
+///
+/// This function executes a database query to delete clips from the `clips` table
+/// where the expiration time is earlier than the current time. It returns the
+/// number of rows affected by the deletion operation.
+///
+/// # Arguments
+///
+/// * `pool` - A reference to a `DatabasePool` representing the connection pool to the database.
+///
+/// # Returns
+///
+/// Returns a `Result<u64, DataError>` indicating success or an error if the deletion operation fails.
+/// If successful, it returns the number of rows affected by the deletion operation.
+///
+pub async fn delete_expired(pool: &DatabasePool) -> Result<u64> {
+    Ok(
+        sqlx::query!(r#"DELETE FROM clips WHERE strftime('%s', 'now') > expires"#)
+            .execute(pool)
+            .await?
+            .rows_affected(),
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use crate::data::Database;
