@@ -7,6 +7,21 @@ use crate::{
 
 type Result<T> = std::result::Result<T, DataError>;
 
+/// Increases the hit count for a given shortcode in the database.
+///
+/// This function updates the `hits` field of a clip with the specified `shortcode`
+/// by adding the provided `hits` value to the existing hit count.
+///
+/// # Arguments
+///
+/// * `shortcode` - A reference to a `ShortCode` representing the shortcode of the clip.
+/// * `hits` - The number of hits to increase the hit count by.
+/// * `pool` - A reference to a `DatabasePool` representing the connection pool to the database.
+///
+/// # Returns
+///
+/// Returns `Result<()>`, indicating success or an error if the hit count update fails.
+/// 
 pub async fn increase_hit_count(
     shortcode: &ShortCode,
     hits: u32,
