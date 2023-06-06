@@ -27,12 +27,16 @@ pub struct Httpd {
 }
 
 #[rocket::launch]
-async fn rocket() -> _ {
+fn rocket() -> _ {
     dotenv().ok();
     let opt = Httpd::from_args();
     let renderer = Renderer::new(opt.template_directory.clone());
-    let database = AppDatabase::new(&opt.connection_string).await;
-    let hit_counter = HitCounter::new(database.get_pool()).await;
+
+    let rt = tokio::runtime::Runtime::new().expect("Failed to spawn tokio runtime");
+    let handle = rt.handle().clone();
+    let database = rt.block_on(async move { AppDatabase::new(&opt.connection_string).await });
+
+    let hit_counter = HitCounter::new(database.get_pool(), handle.clone());
 
     let config = clipstash::RocketConfig {
         renderer,

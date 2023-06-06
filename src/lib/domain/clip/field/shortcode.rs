@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use super::super::ClipError;
 
 #[derive(
-    Debug, Clone, Serialize, Deserialize, PartialEq, From, UriDisplayPath, UriDisplayQuery,
+    Debug, Clone, Serialize, Deserialize, PartialEq, From, UriDisplayPath, UriDisplayQuery, Eq, Hash,
 )]
 pub struct ShortCode(String);
 
