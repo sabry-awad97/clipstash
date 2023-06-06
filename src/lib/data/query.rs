@@ -1,3 +1,5 @@
+use sqlx::Row;
+
 use super::model;
 
 use crate::{
@@ -202,6 +204,36 @@ pub async fn revoke_api_key(api_key: ApiKey, pool: &DatabasePool) -> Result<Revo
             .map(|result| match result.rows_affected() {
                 0 => RevocationStatus::NotFound,
                 _ => RevocationStatus::Revoked,
+            })?,
+    )
+}
+
+/// Checks if an API key is valid in the database.
+///
+/// This function performs a database query to check if the provided `api_key`
+/// exists in the `api_keys` table. It returns a boolean indicating whether the
+/// API key is valid or not.
+///
+/// # Arguments
+///
+/// * `api_key` - An `ApiKey` representing the API key to check.
+/// * `pool` - A reference to a `DatabasePool` representing the connection pool to the database.
+///
+/// # Returns
+///
+/// Returns a `Result<bool, DataError>` indicating success or an error if the check operation fails.
+/// If successful, it returns a boolean value indicating whether the API key is valid or not.
+///
+pub async fn api_key_is_valid(api_key: ApiKey, pool: &DatabasePool) -> Result<bool> {
+    let bytes = api_key.clone().into_inner();
+    Ok(
+        sqlx::query("SELECT COUNT(api_key) FROM api_keys WHERE api_key = ?")
+            .bind(bytes)
+            .fetch_one(pool)
+            .await
+            .map(|row| {
+                let count: u32 = row.get(0);
+                count > 0
             })?,
     )
 }
