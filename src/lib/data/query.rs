@@ -21,7 +21,7 @@ type Result<T> = std::result::Result<T, DataError>;
 /// # Returns
 ///
 /// Returns `Result<()>`, indicating success or an error if the hit count update fails.
-/// 
+///
 pub async fn increase_hit_count(
     shortcode: &ShortCode,
     hits: u32,

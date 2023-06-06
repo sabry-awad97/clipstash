@@ -1,4 +1,5 @@
 use clipstash::data::AppDatabase;
+use clipstash::web::hitcounter::HitCounter;
 use clipstash::web::renderer::Renderer;
 use dotenv::dotenv;
 use std::path::PathBuf;
@@ -31,7 +32,12 @@ async fn rocket() -> _ {
     let opt = Httpd::from_args();
     let renderer = Renderer::new(opt.template_directory.clone());
     let database = AppDatabase::new(&opt.connection_string).await;
+    let hit_counter = HitCounter::new(database.get_pool()).await;
 
-    let config = clipstash::RocketConfig { renderer, database };
+    let config = clipstash::RocketConfig {
+        renderer,
+        database,
+        hit_counter,
+    };
     clipstash::rocket(config)
 }
