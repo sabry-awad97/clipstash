@@ -1,5 +1,6 @@
 use crate::data::{query, DatabasePool, Transaction};
 use crate::service::ask;
+use crate::web::api::ApiKey;
 use crate::{Clip, ServiceError, ShortCode};
 use std::convert::TryInto;
 
@@ -104,4 +105,20 @@ pub async fn get_clip(req: ask::GetClip, pool: &DatabasePool) -> Result<Clip, Se
     } else {
         Ok(clip)
     }
+}
+
+/// Checks if an API key is valid in the database.
+///
+/// # Arguments
+///
+/// * `api_key` - An `ApiKey` representing the API key to check.
+/// * `pool` - A reference to a `DatabasePool` representing the connection pool to the database.
+///
+/// # Returns
+///
+/// Returns a `Result<bool, ServiceError>` indicating success or an error if the check operation fails.
+/// If successful, it returns a boolean value indicating whether the API key is valid or not.
+///
+pub async fn api_key_is_valid(api_key: ApiKey, pool: &DatabasePool) -> Result<bool, ServiceError> {
+    Ok(query::api_key_is_valid(api_key, pool).await?)
 }
