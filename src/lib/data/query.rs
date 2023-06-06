@@ -2,6 +2,7 @@ use super::model;
 
 use crate::{
     data::{DataError, DatabasePool},
+    web::api::ApiKey,
     ShortCode,
 };
 
@@ -140,6 +141,29 @@ pub async fn update_clip<M: Into<model::UpdateClip>>(
     .execute(pool)
     .await?;
     get_clip(model.shortcode, pool).await
+}
+
+/// Saves an API key to the database.
+///
+/// This function inserts the provided `api_key` into the `api_keys` table in the database.
+///
+/// # Arguments
+///
+/// * `api_key` - An `ApiKey` representing the API key to save.
+/// * `pool` - A reference to a `DatabasePool` representing the connection pool to the database.
+///
+/// # Returns
+///
+/// Returns a `Result<ApiKey, DataError>` indicating success or an error if the save operation fails.
+/// If successful, the original `api_key` is returned.
+///
+pub async fn save_api_key(api_key: ApiKey, pool: &DatabasePool) -> Result<ApiKey> {
+    let bytes = api_key.clone().into_inner();
+    let _ = sqlx::query!("INSERT INTO api_keys (api_key) VALUES (?)", bytes)
+        .execute(pool)
+        .await
+        .map(|_| ())?;
+    Ok(api_key)
 }
 
 #[cfg(test)]
