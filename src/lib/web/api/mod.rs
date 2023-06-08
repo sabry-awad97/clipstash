@@ -2,12 +2,20 @@ mod catcher;
 mod error;
 mod routes;
 
+pub use catcher::catchers;
+pub use routes::routes;
+
 use std::str::FromStr;
 
 use base64::engine::{general_purpose, Engine};
-use rocket::{request::{FromRequest, Outcome}, Request, http::Status, serde::json::Json, State};
+use rocket::{
+    http::Status,
+    request::{FromRequest, Outcome},
+    serde::json::Json,
+    Request, State,
+};
 
-use crate::{web::api::error::ApiError, data::AppDatabase, service::action};
+use crate::{data::AppDatabase, service::action, web::api::error::ApiError};
 
 use self::error::ApiKeyError;
 
