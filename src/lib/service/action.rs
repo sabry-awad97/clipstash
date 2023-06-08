@@ -155,3 +155,17 @@ pub async fn revoke_api_key(
 pub async fn api_key_is_valid(api_key: ApiKey, pool: &DatabasePool) -> Result<bool, ServiceError> {
     Ok(query::api_key_is_valid(api_key, pool).await?)
 }
+
+/// Deletes expired records from the database and returns the number of deleted records.
+///
+/// # Arguments
+///
+/// * `pool` - A reference to a `DatabasePool` object representing the database connection pool.
+///
+/// # Returns
+///
+/// Returns a `Result` containing the number of deleted records if the deletion process is successful,
+/// or a `ServiceError` if an error occurs during the deletion process.
+pub async fn delete_expired(pool: &DatabasePool) -> Result<u64, ServiceError> {
+    Ok(query::delete_expired(pool).await?)
+}
