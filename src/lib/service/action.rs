@@ -107,6 +107,24 @@ pub async fn get_clip(req: ask::GetClip, pool: &DatabasePool) -> Result<Clip, Se
     }
 }
 
+/// Revokes an API key, returning the revocation status.
+///
+/// # Arguments
+///
+/// * `api_key` - An instance of the `ApiKey` struct representing the API key to be revoked.
+/// * `pool` - A reference to a `DatabasePool` object representing the database connection pool.
+///
+/// # Returns
+///
+/// Returns a `Result` containing the `RevocationStatus` if the API key revocation is successful,
+/// or a `ServiceError` if an error occurs during the revocation process.
+pub async fn revoke_api_key(
+    api_key: ApiKey,
+    pool: &DatabasePool,
+) -> Result<query::RevocationStatus, ServiceError> {
+    Ok(query::revoke_api_key(api_key, pool).await?)
+}
+
 /// Checks if an API key is valid in the database.
 ///
 /// # Arguments
