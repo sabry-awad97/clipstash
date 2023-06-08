@@ -107,6 +107,21 @@ pub async fn get_clip(req: ask::GetClip, pool: &DatabasePool) -> Result<Clip, Se
     }
 }
 
+/// Generates a new API key and saves it in the database, returning the generated key.
+///
+/// # Arguments
+///
+/// * `pool` - A reference to a `DatabasePool` object representing the database connection pool.
+///
+/// # Returns
+///
+/// Returns a `Result` containing the generated `ApiKey` if the key generation and saving process is successful,
+/// or a `ServiceError` if an error occurs during the process.
+pub async fn generate_api_key(pool: &DatabasePool) -> Result<ApiKey, ServiceError> {
+    let api_key = ApiKey::default();
+    Ok(query::save_api_key(api_key, pool).await?)
+}
+
 /// Revokes an API key, returning the revocation status.
 ///
 /// # Arguments
