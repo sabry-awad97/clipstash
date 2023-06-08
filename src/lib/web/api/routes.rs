@@ -33,6 +33,16 @@ pub async fn get_clip(
     Ok(Json(clip))
 }
 
+#[rocket::post("/", data = "<req>")]
+pub async fn new_clip(
+    req: Json<service::ask::NewClip>,
+    database: &State<AppDatabase>,
+    _api_key: ApiKey,
+) -> Result<Json<crate::Clip>, ApiError> {
+    let clip = action::new_clip(req.into_inner(), database.get_pool()).await?;
+    Ok(Json(clip))
+}
+
 #[rocket::get("/key")]
 pub async fn new_api_key(database: &State<AppDatabase>) -> Result<Json<&str>, ApiError> {
     let api_key = action::generate_api_key(database.get_pool()).await?;
@@ -41,5 +51,5 @@ pub async fn new_api_key(database: &State<AppDatabase>) -> Result<Json<&str>, Ap
 }
 
 pub fn routes() -> Vec<rocket::Route> {
-    rocket::routes!(get_clip, new_api_key)
+    rocket::routes!(get_clip, new_clip, new_api_key)
 }
