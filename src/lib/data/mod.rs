@@ -115,6 +115,16 @@ mod tests {
         assert!(!db.get_pool().is_closed());
     }
 
+    pub async fn _new_db() -> AppDatabase {
+        use sqlx::migrate::Migrator;
+        use std::path::Path;
+        let db = Database::new(":memory:").await;
+        let migrator = Migrator::new(Path::new("./migrations")).await.unwrap();
+        let pool = db.get_pool();
+        migrator.run(pool).await.unwrap();
+        db
+    }
+
     #[tokio::test]
     async fn test_database_query_simple() {
         // Test that a query can be executed on the database
